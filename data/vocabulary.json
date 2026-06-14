@@ -1,0 +1,47 @@
+{
+  "animals": [
+    {"word": "CAT", "description": "A cute furry pet that says meow!"},
+    {"word": "DOG", "description": "A loyal pet that says woof!"},
+    {"word": "PIG", "description": "A pink farm animal that says oink!"},
+    {"word": "FOX", "description": "A clever animal with a bushy tail!"},
+    {"word": "OWL", "description": "A wise night bird that hoot-hoots!"},
+    {"word": "HEN", "description": "A farm bird that lays eggs!"}
+  ],
+  "food": [
+    {"word": "APPLE", "description": "A crunchy red fruit that grows on trees!"},
+    {"word": "PEAR", "description": "A sweet green fruit shaped like a teardrop!"},
+    {"word": "BANANA", "description": "A yellow fruit that monkeys love to eat!"},
+    {"word": "CAKE", "description": "A sweet treat with candles for birthdays!"},
+    {"word": "MILK", "description": "A healthy white drink from cows!"},
+    {"word": "EGG", "description": "An oval food that hen lays!"}
+  ],
+  "objects": [
+    {"word": "CAR", "description": "A small vehicle with four wheels to drive!"},
+    {"word": "BUS", "description": "A big yellow vehicle for school kids!"},
+    {"word": "CUP", "description": "You drink water or milk from this!"},
+    {"word": "HAT", "description": "Something you wear on your head to block the sun!"},
+    {"word": "BOX", "description": "A square cardboard package to hold toys!"},
+    {"word": "BALL", "description": "A round toy that you bounce and kick!"}
+  ],
+  "colors": [
+    {"word": "RED", "description": "The color of fire trucks and ripe apples!"},
+    {"word": "BLUE", "description": "The color of the sky on a sunny day!"},
+    {"word": "GREEN", "description": "The color of grass and leafy trees!"},
+    {"word": "YELLOW", "description": "The color of the bright hot sun!"},
+    {"word": "PINK", "description": "The color of sweet cotton candy and pigs!"}
+  ],
+  "actions": [
+    {"word": "RUN", "description": "Moving very fast on your feet!"},
+    {"word": "JUMP", "description": "Springing up high off the ground!"},
+    {"word": "FLY", "description": "Soaring through the air like a bird!"},
+    {"word": "WALK", "description": "Moving step by step at a nice slow pace!"},
+    {"word": "SWIM", "description": "Moving through water like a little fish!"}
+  ],
+  "space": [
+    {"word": "STAR", "description": "A glowing light in the night sky!"},
+    {"word": "MOON", "description": "A bright circle or crescent in the night sky!"},
+    {"word": "ROCKET", "description": "A spaceship that blasts off into space!"},
+    {"word": "SUN", "description": "Our closest bright yellow star that makes the day warm!"},
+    {"word": "UFO", "description": "A flying saucer with friendly aliens!"}
+  ]
+}
