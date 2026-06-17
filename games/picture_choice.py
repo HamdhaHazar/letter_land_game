@@ -137,8 +137,7 @@ class PictureChoiceGame:
             self.buttons.append(OptionButton(choice, (bx, btn_y, btn_w, btn_h), col))
             
         # Speak prompt question
-        self.voice.speak("What is this?")
-        self.voice.speak(self.description)
+        self.voice.speak(self.word)
 
     def handle_event(self, event):
         mx, my = pygame.mouse.get_pos()
@@ -163,7 +162,7 @@ class PictureChoiceGame:
                         self.word_errors += 1
                         self.ai.record_mistake(self.word)
                         self.audio.play_sfx("fail")
-                        self.voice.speak("Oops! That's not it, try another one!")
+                        # Error speech removed
                         
                         # Adaptive assistance: hide this incorrect button if struggling
                         btn.visible = False
@@ -188,7 +187,7 @@ class PictureChoiceGame:
             
         self.audio.play_sfx("success")
         self.particles.spawn_burst(W // 2, H // 2, count=30, shape="confetti")
-        self.voice.speak(f"Great job! That is {self.word}!")
+        self.voice.speak(self.word)
 
     def update(self, dt):
         self.particles.update(dt)
@@ -216,7 +215,7 @@ class PictureChoiceGame:
             if self.repeat_timer >= WORD_REPEAT_INTERVAL:
                 self.repeat_timer = 0.0
                 if not self.voice.is_busy():
-                    self.voice.speak(f"What is this? Can you find {self.word}?")
+                    self.voice.speak(self.word)
 
     def draw(self, surface):
         # 1. Vibrant Sky Blue gradient matching Reference Image 1 third screen

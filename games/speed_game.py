@@ -197,7 +197,7 @@ class SpeedGame:
             self.asteroids.append(Asteroid(text, ax, ay, speed_mult))
             
         # Audio call
-        self.voice.speak(f"Can you spot the flying {self.target_word} asteroid? Tap it quickly!")
+        self.voice.speak(self.target_word)
 
     def handle_event(self, event):
         mx, my = pygame.mouse.get_pos()
@@ -227,9 +227,7 @@ class SpeedGame:
                     self.ai.record_mistake(self.target_word)
                     self.audio.play_sfx("fail")
                     
-                    # Highlight target if struggling
-                    self.voice.speak(f"Oops! That is the {clicked_ast.text} asteroid!")
-                    self.voice.speak(f"Can you find and tap the {self.target_word} asteroid?")
+                    # Highlight target if struggling removed
                     clicked_ast.visible = False
 
     def trigger_asteroid_pop(self, ast):
@@ -247,7 +245,7 @@ class SpeedGame:
         self.particles.spawn_burst(ast.x, ast.y, count=30, shape="star", colors=[(230, 230, 230), (130, 120, 120)])
         ast.visible = False
         
-        self.voice.speak(f"Boom! You blasted the {self.target_word} asteroid!")
+        self.voice.speak(self.target_word)
 
     def update(self, dt):
         self.particles.update(dt)
@@ -295,7 +293,7 @@ class SpeedGame:
             if self.repeat_timer >= WORD_REPEAT_INTERVAL:
                 self.repeat_timer = 0.0
                 if not self.voice.is_busy():
-                    self.voice.speak(f"Look closely! Find and tap the {self.target_word} asteroid!")
+                    self.voice.speak(self.target_word)
 
     def draw(self, surface):
         # 1. Deep space backdrop with floating stars

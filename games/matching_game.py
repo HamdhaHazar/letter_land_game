@@ -228,10 +228,7 @@ class MatchingGame:
             ))
             
         self.current_target_word = pic_items[0]["word"].upper()
-        if self.level_idx == 4:
-            self.voice.speak(f"Let's match some action words! Can you find and match the picture for {self.current_target_word}?")
-        else:
-            self.voice.speak(f"Let's match some objects! Find and match the picture for {self.current_target_word}?")
+        self.voice.speak(self.current_target_word)
 
     def handle_event(self, event):
         mx, my = pygame.mouse.get_pos()
@@ -263,10 +260,7 @@ class MatchingGame:
                     self.selected_pic_card = clicked_card
                     clicked_card.selected = True
                     
-                    if clicked_card.text == self.current_target_word:
-                        self.voice.speak(f"Yes, that is {clicked_card.text}! Now find the word {clicked_card.text}!")
-                    else:
-                        self.voice.speak(clicked_card.text)
+                    self.voice.speak(clicked_card.text)
                 else:
                     if self.selected_word_card:
                         self.selected_word_card.selected = False
@@ -303,7 +297,7 @@ class MatchingGame:
             
             # Speak correct match word and prompt next
             matched_text = p_card.text
-            self.voice.speak(f"Correct! {matched_text}!")
+            self.voice.speak(matched_text)
             
             self.selected_pic_card = None
             self.selected_word_card = None
@@ -316,7 +310,7 @@ class MatchingGame:
                 remaining = [c.text for c in self.cards if not c.matched and c.card_type == "pic"]
                 if remaining:
                     self.current_target_word = remaining[0]
-                    self.voice.speak(f"Now, let's find and match {self.current_target_word}!")
+                    self.voice.speak(self.current_target_word)
         else:
             # Mismatch!
             p_card.selected = False
@@ -325,7 +319,7 @@ class MatchingGame:
             self.word_errors += 1
             self.ai.record_mistake(p_card.text)
             self.audio.play_sfx("fail")
-            self.voice.speak("Oops! Not a match, try again!")
+            # Error speech removed
             
             # Adaptive AI: If errors accrue, show glowing outline matching helper
             if self.ai.get_hint_level(p_card.text) >= 1:
@@ -393,7 +387,7 @@ class MatchingGame:
                 self.repeat_timer = 0.0
                 if not self.voice.is_busy():
                     if self.current_target_word:
-                        self.voice.speak(f"Find and match the picture of {self.current_target_word}!")
+                        self.voice.speak(self.current_target_word)
 
     def draw(self, surface):
         # 1. Vibrant Sky Blue gradient matching Reference Image 1 third screen

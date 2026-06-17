@@ -159,10 +159,7 @@ class ListeningGame:
             by = H - random.randint(180, 240)
             self.balloons.append(FloatingBalloon(col, bx, by))
             
-        if self.target_color.upper() == "RED":
-            self.voice.speak("Touch the RED RED balloon! RED! RED!")
-        else:
-            self.voice.speak(f"Touch the {self.target_color} balloon!")
+        self.voice.speak(self.target_color)
 
     def handle_event(self, event):
         mx, my = pygame.mouse.get_pos()
@@ -194,9 +191,7 @@ class ListeningGame:
                     self.ai.record_mistake(self.target_color)
                     self.audio.play_sfx("fail")
                     
-                    # Say descriptive correction voice
-                    self.voice.speak(f"No, that is the {clicked_balloon.color_name} balloon!")
-                    self.voice.speak(f"Can you find the {self.target_color} balloon?")
+                    # Error speech removed
                     
                     # Adaptive check: hide balloon
                     clicked_balloon.visible = False
@@ -216,7 +211,7 @@ class ListeningGame:
         self.particles.spawn_burst(balloon.x, balloon.y, count=30, shape="star", colors=[balloon.color, WHITE])
         balloon.visible = False
         
-        self.voice.speak(f"Pop! Awesome job, that is {self.target_color}!")
+        self.voice.speak(self.target_color)
 
     def update(self, dt):
         self.particles.update(dt)
@@ -246,10 +241,7 @@ class ListeningGame:
             if self.repeat_timer >= WORD_REPEAT_INTERVAL:
                 self.repeat_timer = 0.0
                 if not self.voice.is_busy():
-                    if self.target_color.upper() == "RED":
-                        self.voice.speak("Pop the RED RED balloon! RED! RED!")
-                    else:
-                        self.voice.speak(f"Pop the {self.target_color} balloon!")
+                    self.voice.speak(self.target_color)
 
     def draw(self, surface):
         # 1. Vibrant Sky Blue gradient matching Reference Image 1 third screen

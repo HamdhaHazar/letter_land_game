@@ -216,7 +216,7 @@ class DragSpellGame:
             self.tiles.append(FloatingTile(char, tx, ty))
             
         # Speak spelling prompt
-        self.voice.speak(f"Can you spell {self.word}? {self.description}")
+        self.voice.speak(self.word)
 
     def handle_event(self, event):
         mx, my = pygame.mouse.get_pos()
@@ -261,9 +261,8 @@ class DragSpellGame:
                             tile.x = slot.cx - tile.size // 2
                             tile.y = slot.cy - tile.size // 2
                             
-                            # Phonics guide output
-                            sound_sp = PHONICS.get(tile.char, tile.char)
-                            self.voice.speak(sound_sp)
+                            # Phonics guide output removed
+                            pass
                             
                             self.particles.spawn_burst(slot.cx, slot.cy, count=12, shape="star", colors=[GOLD, WHITE])
                             self.audio.play_sfx("click")
@@ -276,7 +275,7 @@ class DragSpellGame:
                             self.word_errors += 1
                             self.ai.record_mistake(self.word)
                             self.audio.play_sfx("fail")
-                            self.voice.speak("Oops! Try again, you can do it!")
+                            # Error speech removed
                             break
                             
                 if not dropped_successfully:
@@ -302,7 +301,7 @@ class DragSpellGame:
             
         self.audio.play_sfx("success")
         self.particles.spawn_burst(W // 2, H // 2, count=30, shape="star")
-        self.voice.speak(f"Awesome! You spelled {self.word}!")
+        self.voice.speak(self.word)
 
     def update(self, dt):
         self.particles.update(dt)
@@ -339,7 +338,7 @@ class DragSpellGame:
             if self.repeat_timer >= WORD_REPEAT_INTERVAL:
                 self.repeat_timer = 0.0
                 if not self.voice.is_busy():
-                    self.voice.speak(f"Spell {self.word}!")
+                    self.voice.speak(self.word)
 
     def draw(self, surface):
         # 1. Vibrant Sky Blue gradient matching Reference Image 1 third screen

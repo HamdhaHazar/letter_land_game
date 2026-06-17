@@ -56,6 +56,7 @@ class LevelManager:
         
         # Particles
         self.particles = ParticleSystem()
+        self.last_spoken_word = None
         
         # Audio
         theme_names = ["jungle", "food", "objects", "food", "jungle", "space", "space"]
@@ -105,6 +106,19 @@ class LevelManager:
             6: f"Final Ultimate Star challenge, {nickname}! Select the flying target asteroid correctly to win the Words Land Crown!"
         }
         self.voice.speak(tut_texts.get(self.level_idx, "Let's play and learn!"))
+
+    def get_current_word(self):
+        if not self.active_game:
+            return None
+        if hasattr(self.active_game, "word"):
+            return self.active_game.word
+        elif hasattr(self.active_game, "current_target_word"):
+            return self.active_game.current_target_word
+        elif hasattr(self.active_game, "target_color"):
+            return self.active_game.target_color
+        elif hasattr(self.active_game, "target_word"):
+            return self.active_game.target_word
+        return None
 
     def find_demo_targets(self):
         if self.level_idx == 0:
@@ -178,6 +192,18 @@ class LevelManager:
                         return None
                         
         elif self.state == "playing":
+            # Intercept clicks on the Repeat Word button
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = pygame.mouse.get_pos()
+                repeat_rect = pygame.Rect(W - 400, 30, 140, 40)
+                if repeat_rect.collidepoint(mx, my):
+                    self.audio.play_sfx("click")
+                    word = self.get_current_word()
+                    if word:
+                        self.voice.clear_queue()
+                        self.voice.speak(word)
+                    return None
+            
             # Pass events straight to active game
             result = self.active_game.handle_event(event)
             if result == "completed":
@@ -336,8 +362,7 @@ class LevelManager:
                         self.demo_tile.placed = True
                         self.demo_tile.dragging = False
                         self.audio.play_sfx("click")
-                        sound_sp = PHONICS.get(self.demo_tile.char, self.demo_tile.char)
-                        self.voice.speak(sound_sp)
+                        pass
                         self.active_game.particles.spawn_burst(self.demo_slot.cx, self.demo_slot.cy, count=12, shape="star", colors=[GOLD, WHITE])
                         self.grabbed_tile = None
                         self.ripple_active = True
@@ -379,6 +404,12 @@ class LevelManager:
             result = self.active_game.check_completed()
             if result == "completed":
                 self.start_celebration()
+            else:
+                # Detect and automatically speak new target word
+                word = self.get_current_word()
+                if word and word != self.last_spoken_word:
+                    self.last_spoken_word = word
+                    self.voice.speak(word)
                 
         elif self.state == "celebrating":
             self.cel_time += dt
@@ -526,6 +557,17 @@ class LevelManager:
             
         elif self.state == "playing":
             self.active_game.draw(surface)
+            
+            # Render Repeat Word button
+            repeat_rect = pygame.Rect(W - 400, 30, 140, 40)
+            mx, my = pygame.mouse.get_pos()
+            if repeat_rect.collidepoint(mx, my):
+                repeat_rect = repeat_rect.inflate(6, 4)
+                btn_color = WARM_ACCENT
+            else:
+                btn_color = WARM_HEADER
+            draw_rounded_rect_with_shadow(surface, btn_color, repeat_rect, radius=10, shadow_offset=(1, 2), border_width=2, border_color=WHITE)
+            draw_sticker_text(surface, "🔊 REPEAT", load_font(16, bold=True), CREAM_WHITE, BLACK, repeat_rect.center, border_size=2)
             
         # Draw global Quit button overlay for gameplay and tutorial screens
         if self.state in ["playing", "tutorial"]:
