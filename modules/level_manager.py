@@ -6,7 +6,7 @@ from game_core import (W, H, CREAM_WHITE, DEEP_SKY, GOLD, WHITE, BLACK, PURPLE, 
                        WARM_BG_TOP, WARM_BG_BOT, WARM_ACCENT, WARM_HEADER, WARM_CARD,
                        WARM_CORAL, WARM_GREEN, PEACH_SKIN,
                        load_font, draw_rounded_rect_with_shadow, draw_gradient_rect,
-                       draw_sticker_text, MonkeyGuide)
+                       draw_sticker_text, MonkeyGuide, draw_vector_star, draw_vector_seed)
 from systems.animation_engine import ParticleSystem, Easing
 
 # Imports of game modules will be resolved dynamically to prevent circular imports
@@ -616,24 +616,38 @@ class LevelManager:
             sub_lbl = sub_rw_font.render(lbl_text, True, BLACK)
             surface.blit(sub_lbl, sub_lbl.get_rect(center=(W // 2, H // 2 - 215)))
             
-            stats_lbl = sub_rw_font.render("Earned:  +15 Stars ⭐    +3 Seeds 🌾", True, BLACK)
-            surface.blit(stats_lbl, stats_lbl.get_rect(center=(W // 2, H // 2 - 185)))
+            stats_text = "Earned:  +15 Stars        +3 Seeds"
+            stats_lbl = sub_rw_font.render(stats_text, True, BLACK)
+            lbl_rect = stats_lbl.get_rect(center=(W // 2, H // 2 - 185))
+            surface.blit(stats_lbl, lbl_rect)
+            
+            # Measure widths dynamically to place vector star and seed beside the words
+            w_stars = sub_rw_font.size("Earned:  +15 Stars ")[0]
+            w_seeds = sub_rw_font.size("Earned:  +15 Stars        +3 Seeds ")[0]
+            
+            draw_vector_star(surface, (lbl_rect.x + w_stars + 8, H // 2 - 185), size=10, color=GOLD, border_color=(139, 69, 19))
+            draw_vector_seed(surface, (lbl_rect.x + w_seeds + 8, H // 2 - 185), size=10)
             
             # Evolve Alert
             if self.monkey_evolved and self.cel_time >= 1.8:
                 evolve_rect = pygame.Rect(W // 2 - 200, H // 2 - 130, 400, 42)
                 draw_rounded_rect_with_shadow(surface, WARM_HEADER, evolve_rect, radius=8, shadow_offset=(2, 3), border_width=2, border_color=WHITE)
-                draw_sticker_text(surface, "⭐ TWEETY THE BIRD EVOLVED! ⭐", load_font(18, bold=True), CREAM_WHITE, BLACK, evolve_rect.center, border_size=2)
+                font = load_font(18, bold=True)
+                text_str = "TWEETY THE BIRD EVOLVED!"
+                text_w = font.size(text_str)[0]
+                draw_sticker_text(surface, text_str, font, CREAM_WHITE, BLACK, evolve_rect.center, border_size=2)
+                draw_vector_star(surface, (evolve_rect.centerx - text_w // 2 - 20, evolve_rect.centery), size=10, color=GOLD, border_color=WHITE)
+                draw_vector_star(surface, (evolve_rect.centerx + text_w // 2 + 20, evolve_rect.centery), size=10, color=GOLD, border_color=WHITE)
                 
             # Floating Badge reward announcement if unlocked a new badge
             badge_map = {
-                0: "Animal Master 🐦",
-                1: "Food Expert 🍎",
-                2: "Object Explorer 🚗",
-                3: "Color Genius 🌈",
-                4: "Action Hero 🏃",
-                5: "Star Explorer 🚀",
-                6: "Words Land Champion 👑"
+                0: "Animal Master",
+                1: "Food Expert",
+                2: "Object Explorer",
+                3: "Color Genius",
+                4: "Action Hero",
+                5: "Star Explorer",
+                6: "Words Land Champion"
             }
             badge_name = badge_map.get(self.level_idx, "")
             badge_rect = pygame.Rect(W // 2 - 240, H // 2 + 190, 480, 50)

@@ -7,7 +7,7 @@ from game_core import (W, H, CREAM_WHITE, DEEP_SKY, GOLD, WHITE, BLACK, PURPLE, 
                        WARM_BG_TOP, WARM_BG_BOT, WARM_ACCENT, WARM_HEADER, WARM_CARD,
                        WARM_CORAL, WARM_GREEN,
                        load_font, draw_rounded_rect_with_shadow, draw_gradient_rect,
-                       draw_sticker_text, draw_vocabulary_picture)
+                       draw_sticker_text, draw_vocabulary_picture, draw_vector_star)
 from systems.animation_engine import ParticleSystem
 
 # Word repeat interval (seconds)
@@ -308,9 +308,8 @@ class PictureChoiceGame:
         draw_sticker_text(surface, "STARS", load_font(12, bold=True), CREAM_WHITE, BLACK, tag_rect_s.center, border_size=1)
         draw_rounded_rect_with_shadow(surface, WHITE, stats_rect, radius=12, border_width=3, border_color=GOLD)
         
-        star_font = load_font(20)
-        star_surf = star_font.render("⭐", True, GOLD)
-        surface.blit(star_surf, star_surf.get_rect(midleft=(W - 238, stats_rect.centery)))
+        # Draw a beautiful vector star next to the score text
+        draw_vector_star(surface, (W - 238 + 12, stats_rect.centery), size=11, color=GOLD, border_color=WHITE)
         
         score_font = load_font(16, bold=True)
         score_surf = score_font.render(f"STARS: {self.progress.data['stars']}", True, BLACK)
@@ -323,7 +322,7 @@ class PictureChoiceGame:
         pygame.draw.rect(surface, (30, 45, 35), inner_rect, border_radius=8)
         
         q_font = load_font(24, bold=True)
-        draw_sticker_text(surface, "What is this? 🤔", q_font, CREAM_WHITE, BLACK, board_rect.center, border_size=1)
+        draw_sticker_text(surface, "What is this?", q_font, CREAM_WHITE, BLACK, board_rect.center, border_size=1)
         
         # Draw central food vector placard (shifted and resized to fit perfectly)
         draw_vocabulary_picture(surface, self.word, W // 2, 255, radius=70)
@@ -337,7 +336,12 @@ class PictureChoiceGame:
         if self.celebration:
             banner = pygame.Rect(W // 2 - 250, H // 2 - 50, 500, 100)
             draw_rounded_rect_with_shadow(surface, GOLD, banner, radius=22, shadow_offset=(3, 5), border_width=4, border_color=(139, 69, 19))
-            draw_sticker_text(surface, f"⭐ {self.word}! ⭐", load_font(45, bold=True), (139, 69, 19), WHITE, banner.center, border_size=2)
+            font = load_font(45, bold=True)
+            text_str = f"{self.word}!"
+            text_w = font.size(text_str)[0]
+            draw_sticker_text(surface, text_str, font, (139, 69, 19), WHITE, banner.center, border_size=2)
+            draw_vector_star(surface, (banner.centerx - text_w // 2 - 35, banner.centery), size=18, color=(255, 235, 59), border_color=(139, 69, 19))
+            draw_vector_star(surface, (banner.centerx + text_w // 2 + 35, banner.centery), size=18, color=(255, 235, 59), border_color=(139, 69, 19))
 
     @property
     def active_game_completed(self):

@@ -7,7 +7,7 @@ from game_core import (W, H, CREAM_WHITE, DEEP_SKY, GOLD, WHITE, BLACK, PURPLE, 
                        WARM_BG_TOP, WARM_BG_BOT, WARM_ACCENT, WARM_HEADER, WARM_CARD,
                        WARM_CORAL, WARM_GREEN,
                        load_font, draw_rounded_rect_with_shadow, draw_gradient_rect,
-                       draw_sticker_text, draw_vocabulary_picture, draw_glow_circle)
+                       draw_sticker_text, draw_vocabulary_picture, draw_glow_circle, draw_vector_star)
 from systems.animation_engine import ParticleSystem
 
 # Word repeat interval (seconds)
@@ -497,9 +497,8 @@ class MatchingGame:
         draw_sticker_text(surface, "STARS", load_font(12, bold=True), CREAM_WHITE, BLACK, tag_rect_s.center, border_size=1)
         draw_rounded_rect_with_shadow(surface, WHITE, stats_rect, radius=12, border_width=3, border_color=GOLD)
         
-        star_font = load_font(20)
-        star_surf = star_font.render("⭐", True, GOLD)
-        surface.blit(star_surf, star_surf.get_rect(midleft=(W - 238, stats_rect.centery)))
+        # Draw a beautiful vector star next to the score text
+        draw_vector_star(surface, (W - 238 + 12, stats_rect.centery), size=11, color=GOLD, border_color=WHITE)
         
         score_font = load_font(16, bold=True)
         score_surf = score_font.render(f"STARS: {self.progress.data['stars']}", True, BLACK)
@@ -535,16 +534,21 @@ class MatchingGame:
         
         inst_font = load_font(18, bold=True)
         if self.current_target_word:
-            text_str = f"Can you find and match the picture for {self.current_target_word}? 🔗"
+            text_str = f"Can you find and match the picture for {self.current_target_word}?"
         else:
-            text_str = "Match the picture card with the word card! 🔗"
+            text_str = "Match the picture card with the word card!"
         draw_sticker_text(surface, text_str, inst_font, CREAM_WHITE, BLACK, board_rect.center, border_size=1)
         
         # Winner banner
         if self.celebration:
             banner = pygame.Rect(W // 2 - 250, H // 2 - 50, 500, 100)
             draw_rounded_rect_with_shadow(surface, GOLD, banner, radius=22, shadow_offset=(3, 5), border_width=4, border_color=(139, 69, 19))
-            draw_sticker_text(surface, "MATCH COMPLETE! ⭐", load_font(40, bold=True), (139, 69, 19), WHITE, banner.center, border_size=2)
+            font = load_font(40, bold=True)
+            text_str = "MATCH COMPLETE!"
+            text_w = font.size(text_str)[0]
+            draw_sticker_text(surface, text_str, font, (139, 69, 19), WHITE, banner.center, border_size=2)
+            draw_vector_star(surface, (banner.centerx - text_w // 2 - 35, banner.centery), size=18, color=(255, 235, 59), border_color=(139, 69, 19))
+            draw_vector_star(surface, (banner.centerx + text_w // 2 + 35, banner.centery), size=18, color=(255, 235, 59), border_color=(139, 69, 19))
 
     @property
     def active_game_completed(self):

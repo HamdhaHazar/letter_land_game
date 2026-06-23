@@ -26,6 +26,10 @@ class ProgressTracker:
                     # Merge loaded data with defaults to avoid missing keys
                     for k, v in loaded.items():
                         self.data[k] = v
+                    # Clean any existing badges with emojis for backward compatibility
+                    from game_core import clean_emojis
+                    if "badges" in self.data:
+                        self.data["badges"] = [clean_emojis(b) for b in self.data["badges"]]
         except Exception as e:
             print(f"Error loading player progress: {e}")
             
@@ -89,13 +93,13 @@ class ProgressTracker:
             
             # Badge Awards
             badge_map = {
-                0: "Animal Master 🐵",
-                1: "Food Expert 🍎",
-                2: "Object Explorer 🚗",
-                3: "Color Genius 🌈",
-                4: "Action Hero 🏃",
-                5: "Star Explorer 🚀",
-                6: "Words Land Champion 👑"
+                0: "Animal Master",
+                1: "Food Expert",
+                2: "Object Explorer",
+                3: "Color Genius",
+                4: "Action Hero",
+                5: "Star Explorer",
+                6: "Words Land Champion"
             }
             badge = badge_map.get(level_idx)
             if badge and badge not in self.data["badges"]:

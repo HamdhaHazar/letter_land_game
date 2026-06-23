@@ -1,4 +1,4 @@
-﻿import pygame
+import pygame
 import math
 import random
 import sys
@@ -122,8 +122,21 @@ def draw_gradient_rect(surface, color1, color2, rect, radius=0):
     
     surface.blit(grad_surf, rect.topleft)
 
+def clean_emojis(text):
+    if not text:
+        return text
+    # Strip characters in emoji/dingbat/misc symbol ranges
+    res = []
+    for c in text:
+        o = ord(c)
+        if (0x2600 <= o <= 0x27BF) or (0x2B00 <= o <= 0x2BFF) or (0x1F000 <= o <= 0x1F9FF) or (o == 0xFE0F):
+            continue
+        res.append(c)
+    return "".join(res).strip()
+
 def draw_sticker_text(surface, text, font, text_color, bg_color, center_pos, border_size=4):
     """Draws bubble/sticker style text with a thick border around it."""
+    text = clean_emojis(text)
     lbl_bg = font.render(text, True, bg_color)
     lbl_fg = font.render(text, True, text_color)
     cx, cy = center_pos
@@ -146,6 +159,63 @@ def draw_glow_circle(surface, color, center, radius, glow_width=8):
         glow_surf = pygame.Surface((r*2, r*2), pygame.SRCALPHA)
         pygame.draw.circle(glow_surf, glow_color, (r, r), r, 2)
         surface.blit(glow_surf, (cx - r, cy - r))
+
+def draw_vector_star(surface, center, size, color, border_color=None):
+    cx, cy = center
+    points = []
+    for i in range(10):
+        r = size if i % 2 == 0 else size * 0.45
+        angle = math.pi * 2 * i / 10 - math.pi / 2
+        x = cx + r * math.cos(angle)
+        y = cy + r * math.sin(angle)
+        points.append((x, y))
+    pygame.draw.polygon(surface, color, points)
+    if border_color:
+        pygame.draw.polygon(surface, border_color, points, 2)
+
+def draw_vector_lock(surface, center, size=12):
+    cx, cy = center
+    # Lock body
+    body_rect = pygame.Rect(cx - size, cy - size // 4, size * 2, size * 1.5)
+    pygame.draw.rect(surface, (205, 133, 63), body_rect, border_radius=4)
+    pygame.draw.rect(surface, WHITE, body_rect, 2, border_radius=4)
+    # Shackle (arch)
+    shackle_rect = pygame.Rect(cx - size * 0.7, cy - size * 1.1, size * 1.4, size * 1.4)
+    pygame.draw.arc(surface, (200, 200, 200), shackle_rect, 0, math.pi, 3)
+    # Shackle legs down to the body
+    pygame.draw.line(surface, (200, 200, 200), (cx - size * 0.7, cy - size * 0.4), (cx - size * 0.7, cy - size * 0.2), 3)
+    pygame.draw.line(surface, (200, 200, 200), (cx + size * 0.7, cy - size * 0.4), (cx + size * 0.7, cy - size * 0.2), 3)
+    # Keyhole
+    pygame.draw.circle(surface, BLACK, (cx, cy + size * 0.3), 3)
+    pygame.draw.line(surface, BLACK, (cx, cy + size * 0.3), (cx, cy + size * 0.8), 2)
+
+def draw_vector_seed(surface, center, size=10):
+    cx, cy = center
+    # Draw three little grains pointing up/out
+    pygame.draw.ellipse(surface, (255, 220, 100), (cx - 3, cy - 11, 6, 10))
+    pygame.draw.ellipse(surface, (255, 220, 100), (cx - 8, cy - 3, 6, 10))
+    pygame.draw.ellipse(surface, (255, 220, 100), (cx + 2, cy - 3, 6, 10))
+    # Stem
+    pygame.draw.line(surface, (139, 69, 19), (cx, cy + 2), (cx, cy + 12), 2)
+
+def draw_vector_crown(surface, center, size=12):
+    cx, cy = center
+    # Draw a yellow crown polygon
+    pts = [
+        (cx - size, cy + size * 0.7),
+        (cx - size, cy - size * 0.5),
+        (cx - size * 0.5, cy - size * 0.1),
+        (cx, cy - size * 0.8),
+        (cx + size * 0.5, cy - size * 0.1),
+        (cx + size, cy - size * 0.5),
+        (cx + size, cy + size * 0.7)
+    ]
+    pygame.draw.polygon(surface, GOLD, pts)
+    pygame.draw.polygon(surface, WHITE, pts, 2)
+    # Draw little circles on the three tips
+    pygame.draw.circle(surface, RED, (cx - size, cy - size * 0.5), 3)
+    pygame.draw.circle(surface, RED, (cx, cy - size * 0.8), 3)
+    pygame.draw.circle(surface, RED, (cx + size, cy - size * 0.5), 3)
 
 # --- Programmatic Cartoon Drawing Engine for Vocabulary Words ---
 def draw_vocabulary_picture(surface, word, cx, cy, radius=65):

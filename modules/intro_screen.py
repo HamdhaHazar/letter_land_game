@@ -94,7 +94,7 @@ class IntroScreen:
         banner_h = int(40 * self.logo_scale)
         if banner_w > 10:
             draw_rounded_rect_with_shadow(surface, WARM_HEADER, (W//2 - banner_w//2, logo_y + 60, banner_w, banner_h), radius=10, shadow_offset=(2,3))
-            draw_sticker_text(surface, "🌟 THE GREAT VOCABULARY ADVENTURE 🌟", sub_font, CREAM_WHITE, BLACK, (W // 2, logo_y + 60 + banner_h//2), border_size=2)
+            draw_sticker_text(surface, "THE GREAT VOCABULARY ADVENTURE", sub_font, CREAM_WHITE, BLACK, (W // 2, logo_y + 60 + banner_h//2), border_size=2)
             
         # 5. Play Button (Pulse scale) — warm coral/orange
         btn_scale = 1.0 + math.sin(self.button_pulse) * 0.06

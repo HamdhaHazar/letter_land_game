@@ -5,7 +5,8 @@ from game_core import (W, H, CREAM_WHITE, DEEP_SKY, GOLD, WHITE, BLACK, PURPLE, 
                        LIME_GREEN, WARM_BG_TOP, WARM_BG_BOT, WARM_ACCENT, WARM_HEADER, WARM_CARD,
                        WARM_CORAL, WARM_GREEN, WARM_PEACH,
                        load_font, draw_rounded_rect_with_shadow, draw_gradient_rect,
-                       draw_sticker_text, draw_glow_circle, MonkeyGuide, BirdGuide)
+                       draw_sticker_text, draw_glow_circle, MonkeyGuide, BirdGuide,
+                       draw_vector_star, draw_vector_lock, draw_vector_seed, draw_vector_crown)
 from systems.animation_engine import ParticleSystem
 
 # Coordinates for the winding roadmap path
@@ -196,16 +197,12 @@ class MapSystem:
             
             # Star in center
             if not unlocked:
-                # Lock symbol 🔒
-                lock_font = load_font(28)
-                lock_surf = lock_font.render("🔒", True, (139, 69, 19))
-                surface.blit(lock_surf, lock_surf.get_rect(center=(lx, int(ny))))
+                # Lock symbol (draw programmatically)
+                draw_vector_lock(surface, (lx, int(ny)), size=15)
             else:
-                # Render star emoji
+                # Render star (draw programmatically)
                 star_color = GOLD if not completed else WHITE
-                star_f = load_font(34, bold=True)
-                star_surf = star_f.render("⭐", True, star_color)
-                surface.blit(star_surf, star_surf.get_rect(center=(lx, int(ny) - 2)))
+                draw_vector_star(surface, (lx, int(ny) - 2), size=16, color=star_color, border_color=WHITE)
                 
             # Badge completion checkmark at bottom of node
             if completed:
@@ -300,10 +297,14 @@ class MapSystem:
             draw_gradient_rect(surface, pill["grad_top"], pill["grad_bot"], draw_rect, radius=radius)
             pygame.draw.rect(surface, border_color, draw_rect, 3, border_radius=radius)
             
-            icon_font = load_font(22 if hovered else 20)
-            icon_surf = icon_font.render(pill["icon"], True, BLACK)
             icon_y = draw_rect.centery
-            surface.blit(icon_surf, icon_surf.get_rect(midleft=(draw_rect.x + 10, icon_y)))
+            # Draw pill icon programmatically instead of text
+            if pill["icon"] == "⭐":
+                draw_vector_star(surface, (draw_rect.x + 22, icon_y), size=11, color=GOLD, border_color=WHITE)
+            elif pill["icon"] == "🌾":
+                draw_vector_seed(surface, (draw_rect.x + 22, icon_y), size=9)
+            elif pill["icon"] == "👑":
+                draw_vector_crown(surface, (draw_rect.x + 22, icon_y), size=12)
             
             font_size = 12 if len(pill["text"]) > 13 else 14
             if hovered:

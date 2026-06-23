@@ -167,7 +167,7 @@ class NicknameSystem:
                 go_rect = pygame.Rect(60, 270, 220, 52)
                 draw_rounded_rect_with_shadow(surface, WARM_GREEN, go_rect, radius=15, shadow_offset=(2, 3), border_width=3, border_color=WHITE)
                 go_font = load_font(24, bold=True)
-                draw_sticker_text(surface, "CREATE PASS! 🚀", go_font, CREAM_WHITE, BLACK, go_rect.center, border_size=2)
+                draw_sticker_text(surface, "CREATE PASS!", go_font, CREAM_WHITE, BLACK, go_rect.center, border_size=2)
         else:
             # Welcome Message
             welcome_font = load_font(24, bold=True)
@@ -206,7 +206,7 @@ class NicknameSystem:
         # Title of Passport
         pass_title_rect = pygame.Rect(545, 115, 370, 42)
         draw_rounded_rect_with_shadow(surface, DEEP_SKY, pass_title_rect, radius=10, shadow_offset=(1, 2), border_width=2, border_color=WHITE)
-        draw_sticker_text(surface, "★ WORDS LAND EXPLORER PASS ★", load_font(18, bold=True), CREAM_WHITE, BLACK, pass_title_rect.center, border_size=2)
+        draw_sticker_text(surface, "WORDS LAND EXPLORER PASS", load_font(18, bold=True), CREAM_WHITE, BLACK, pass_title_rect.center, border_size=2)
         
         # Polaroid Photo Frame (for Bird Avatar)
         photo_rect = pygame.Rect(630, 175, 200, 220)
@@ -242,9 +242,9 @@ class NicknameSystem:
         
         labels = [
             ("EXPLORER NAME:", self.input_text if self.input_text else "_________________"),
-            ("EXPLORER RANK:", "Words Land Novice 🐦" if not self.submitted else "Official Explorer! 🎖️"),
+            ("EXPLORER RANK:", "Words Land Novice" if not self.submitted else "Official Explorer!"),
             ("PASSPORT ID:", f"EXP-{2026 + len(self.input_text)}-WL" if self.input_text else "EXP-XXXX-WL"),
-            ("STATUS:", "PENDING 🟡" if not self.submitted else "APPROVED ✅")
+            ("STATUS:", "PENDING" if not self.submitted else "APPROVED")
         ]
         
         for idx, (label_txt, value_txt) in enumerate(labels):

@@ -54,7 +54,7 @@ class TeacherDashboard:
         # Title Board (warm amber)
         title_rect = pygame.Rect(W//2 - 250, 20, 500, 60)
         draw_rounded_rect_with_shadow(surface, WARM_HEADER, title_rect, radius=15, shadow_offset=(2, 3), border_width=3, border_color=GOLD)
-        draw_sticker_text(surface, "TEACHER DASHBOARD 📊", load_font(28, bold=True), CREAM_WHITE, BLACK, title_rect.center, border_size=2)
+        draw_sticker_text(surface, "TEACHER DASHBOARD", load_font(28, bold=True), CREAM_WHITE, BLACK, title_rect.center, border_size=2)
         
         # --- LEFT SHEET CONTENT ---
         lbl_font = load_font(22, bold=True)
@@ -68,8 +68,8 @@ class TeacherDashboard:
         # Stats summary block
         stats = [
             f"Explorer Name: {self.progress.get_nickname()}",
-            f"Total Stars: ⭐ {self.progress.data['stars']}",
-            f"Total Bananas: 🍌 {self.progress.data['bananas']}",
+            f"Total Stars: {self.progress.data['stars']}",
+            f"Total Bananas: {self.progress.data['bananas']}",
             f"Levels Completed: {len(self.progress.data['completed_levels'])} / 6"
         ]
         for idx, stat in enumerate(stats):
@@ -110,7 +110,7 @@ class TeacherDashboard:
         
         weak_words = self.progress.get_weak_words(limit=5)
         if not weak_words:
-            surface.blit(body_font.render("Great job! No weak words logged yet! ✨", True, JUNGLE_GREEN), (565, 160))
+            surface.blit(body_font.render("Great job! No weak words logged yet!", True, JUNGLE_GREEN), (565, 160))
         else:
             for idx, (word, count) in enumerate(weak_words):
                 txt = f"{idx + 1}. {word}  -  {count} Mistakes"
@@ -136,7 +136,7 @@ class TeacherDashboard:
             
         surface.blit(lbl_font.render("Strongest Vocabulary Area", True, PURPLE), (555, 330))
         pygame.draw.line(surface, DEEP_SKY, (555, 360), (950, 360), 2)
-        surface.blit(body_font.render(f"Category:  {strongest.upper()} 🌟", True, JUNGLE_GREEN), (565, 380))
+        surface.blit(body_font.render(f"Category:  {strongest.upper()}", True, JUNGLE_GREEN), (565, 380))
         
         # Badges Unlocked Block
         surface.blit(lbl_font.render("Explorer Badges Unlocked", True, PURPLE), (555, 430))

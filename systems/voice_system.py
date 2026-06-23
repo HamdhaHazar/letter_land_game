@@ -97,6 +97,9 @@ class VoiceSystem:
                 except queue.Empty:
                     return
                 
+                from game_core import clean_emojis
+                text = clean_emojis(text)
+                
                 IS_SPEAKING = True
                 SUBTITLE_TEXT = text
                 word_count = len(text.split())
@@ -107,7 +110,7 @@ class VoiceSystem:
                     self.audio_manager.duck_music()
                     
                 # Clean punctuation for speech
-                cleaned_text = text.replace("🐵", "").replace("🍎", "").replace("🚗", "").replace("🌈", "").replace("🏃", "").replace("🚀", "").replace("⭐", "").replace("🍌", "")
+                cleaned_text = text
                 try:
                     self.engine.say(cleaned_text)
                     self.is_speaking_state = True
@@ -124,6 +127,9 @@ class VoiceSystem:
                     text = self.speech_queue.get_nowait()
                 except queue.Empty:
                     return
+                
+                from game_core import clean_emojis
+                text = clean_emojis(text)
                 
                 IS_SPEAKING = True
                 SUBTITLE_TEXT = text
