@@ -54,7 +54,11 @@ class MapSystem:
         
         # Speak instructions on map start
         nickname = self.progress.get_nickname()
+        self.show_completion_popup = False
         if len(self.progress.data["completed_levels"]) >= 7:
+            if not getattr(self.progress, "completion_shown", False):
+                self.show_completion_popup = True
+                self.progress.completion_shown = True
             self.voice.speak(f"Welcome back, Grand Champion {nickname}! You have completed the entire game! Feel free to replay any level!")
         else:
             self.voice.speak(f"Hey {nickname}! Choose a level to start your adventure!")
@@ -89,6 +93,13 @@ class MapSystem:
             pygame.quit()
             import sys
             sys.exit()
+            
+        if self.show_completion_popup:
+            btn_rect = pygame.Rect(W // 2 - 130, H // 2 + 75, 260, 55)
+            if btn_rect.collidepoint(mx, my):
+                self.audio.play_sfx("click")
+                self.show_completion_popup = False
+            return None
             
         # (Bottom Navigation Dock click check removed)
             
@@ -330,14 +341,61 @@ class MapSystem:
 
         # Draw Game Completion Banner at the bottom if all 7 levels are finished
         if len(self.progress.data["completed_levels"]) >= 7:
-            banner_rect = pygame.Rect(W // 2 - 280, H - 75, 560, 45)
+            banner_rect = pygame.Rect(W // 2 - 300, H - 75, 600, 45)
             draw_rounded_rect_with_shadow(surface, WARM_GREEN, banner_rect, radius=12, shadow_offset=(1, 2), border_width=2, border_color=WHITE)
             
             font = load_font(16, bold=True)
-            msg = "CONGRATULATIONS! YOU COMPLETED THE GAME!"
+            msg = "CONGRATULATIONS! THE GAME IS ALREADY FINISHED!"
             msg_w = font.size(msg)[0]
             
             draw_sticker_text(surface, msg, font, CREAM_WHITE, BLACK, banner_rect.center, border_size=2)
             
             draw_vector_star(surface, (banner_rect.centerx - msg_w // 2 - 25, banner_rect.centery), size=9, color=GOLD, border_color=WHITE)
             draw_vector_star(surface, (banner_rect.centerx + msg_w // 2 + 25, banner_rect.centery), size=9, color=GOLD, border_color=WHITE)
+
+        # Draw completion popup modal if active
+        if self.show_completion_popup:
+            # 1. Semi-transparent dark overlay
+            overlay = pygame.Surface((W, H), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 140))
+            surface.blit(overlay, (0, 0))
+            
+            # 2. Main dialog card (creamy white with gold border)
+            popup_rect = pygame.Rect(W // 2 - 280, H // 2 - 180, 560, 360)
+            draw_rounded_rect_with_shadow(surface, WARM_CARD, popup_rect, radius=20, shadow_offset=(4, 6), border_width=4, border_color=GOLD)
+            
+            # 3. Gold crown at the top center of card
+            draw_vector_crown(surface, (W // 2, H // 2 - 145), size=24)
+            
+            # 4. Text headers
+            title_font = load_font(30, bold=True)
+            body_font = load_font(18, bold=True)
+            
+            nickname = self.progress.get_nickname().upper()
+            draw_sticker_text(surface, "CONGRATULATIONS!", title_font, GOLD, BROWN, (W // 2, H // 2 - 100), border_size=2)
+            
+            # Stars flanking the title
+            draw_vector_star(surface, (W // 2 - 180, H // 2 - 100), size=14, color=GOLD, border_color=WHITE)
+            draw_vector_star(surface, (W // 2 + 180, H // 2 - 100), size=14, color=GOLD, border_color=WHITE)
+            
+            lines = [
+                f"You have finished the entire game, {nickname}!",
+                "You completed all 7 levels of Words Land!",
+                "You are now a Grand Champion explorer!"
+            ]
+            for idx, line in enumerate(lines):
+                draw_sticker_text(surface, line, body_font, CREAM_WHITE, BLACK, (W // 2, H // 2 - 45 + idx * 34), border_size=2)
+                
+            # 5. Dismiss button (pulsating slightly)
+            btn_rect = pygame.Rect(W // 2 - 130, H // 2 + 80, 260, 52)
+            pulse = 1.0 + math.sin(pygame.time.get_ticks() * 0.005) * 0.03
+            btn_rect_draw = btn_rect.inflate(int(260 * (pulse - 1)), int(52 * (pulse - 1)))
+            
+            mx_m, my_m = pygame.mouse.get_pos()
+            if btn_rect.collidepoint(mx_m, my_m):
+                btn_color = WARM_GREEN
+            else:
+                btn_color = (100, 200, 100)
+                
+            draw_rounded_rect_with_shadow(surface, btn_color, btn_rect_draw, radius=15, shadow_offset=(2, 3), border_width=2, border_color=WHITE)
+            draw_sticker_text(surface, "REPLAY LEVELS", load_font(18, bold=True), CREAM_WHITE, BLACK, btn_rect.center, border_size=2)

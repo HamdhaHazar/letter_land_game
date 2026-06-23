@@ -12,7 +12,8 @@ LEVEL_WORDS = {
     2: ["CAR", "BUS", "CUP", "HAT", "BOX", "BALL"],
     3: ["RED", "BLUE", "GREEN", "YELLOW", "PINK"],
     4: ["RUN", "JUMP", "FLY", "WALK", "SWIM"],
-    5: ["STAR", "MOON", "ROCKET", "SUN", "UFO"]
+    5: ["STAR", "MOON", "ROCKET", "SUN", "UFO"],
+    6: ["CAT", "DOG", "PIG", "FOX", "OWL", "HEN", "APPLE", "PEAR", "BANANA", "CAKE", "MILK", "EGG", "STAR", "MOON", "ROCKET", "SUN", "UFO"]
 }
 
 class TeacherDashboard:
@@ -70,7 +71,7 @@ class TeacherDashboard:
             f"Explorer Name: {self.progress.get_nickname()}",
             f"Total Stars: {self.progress.data['stars']}",
             f"Total Bananas: {self.progress.data['bananas']}",
-            f"Levels Completed: {len(self.progress.data['completed_levels'])} / 6"
+            f"Levels Completed: {len(self.progress.data['completed_levels'])} / 7"
         ]
         for idx, stat in enumerate(stats):
             surface.blit(body_font.render(stat, True, BLACK), (70, 155 + idx * 30))
@@ -80,28 +81,28 @@ class TeacherDashboard:
         surface.blit(lbl_font.render("Level Accuracy rates", True, PURPLE), (65, graph_y))
         pygame.draw.line(surface, DEEP_SKY, (65, graph_y + 30), (460, graph_y + 30), 2)
         
-        for i in range(6):
+        for i in range(7):
             # Get words for level
             words = LEVEL_WORDS[i]
             acc = self.progress.get_level_accuracy(words)
             
             lvl_lbl = f"Lvl {i+1}:"
             # Draw label
-            surface.blit(small_font.render(lvl_lbl, True, BLACK), (70, graph_y + 50 + i * 42))
+            surface.blit(small_font.render(lvl_lbl, True, BLACK), (70, graph_y + 45 + i * 36))
             
             # Draw bar background
             bar_w = 260
             bar_h = 16
-            pygame.draw.rect(surface, (230, 230, 220), (130, graph_y + 52 + i * 42, bar_w, bar_h), border_radius=8)
+            pygame.draw.rect(surface, (230, 230, 220), (130, graph_y + 47 + i * 36, bar_w, bar_h), border_radius=8)
             # Draw bar fill
             fill_w = int(bar_w * (acc / 100.0))
             bar_color = LIME_GREEN if acc >= 80 else (GOLD if acc >= 50 else RED)
             if fill_w > 0:
-                pygame.draw.rect(surface, bar_color, (130, graph_y + 52 + i * 42, fill_w, bar_h), border_radius=8)
-            pygame.draw.rect(surface, BLACK, (130, graph_y + 52 + i * 42, bar_w, bar_h), 1, border_radius=8)
+                pygame.draw.rect(surface, bar_color, (130, graph_y + 47 + i * 36, fill_w, bar_h), border_radius=8)
+            pygame.draw.rect(surface, BLACK, (130, graph_y + 47 + i * 36, bar_w, bar_h), 1, border_radius=8)
             
             # Draw percentage text
-            surface.blit(small_font.render(f"{acc}%", True, BLACK), (400, graph_y + 50 + i * 42))
+            surface.blit(small_font.render(f"{acc}%", True, BLACK), (400, graph_y + 45 + i * 36))
             
         # --- RIGHT SHEET CONTENT ---
         # Title of Right sheet

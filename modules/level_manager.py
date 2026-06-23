@@ -616,7 +616,7 @@ class LevelManager:
             
             sub_rw_font = load_font(22, bold=True)
             if self.level_idx == 6:
-                lbl_text = "Whole Game Completed!"
+                lbl_text = "Congratulations! You have finished the game!"
             else:
                 lbl_text = "Level Completed!"
             sub_lbl = sub_rw_font.render(lbl_text, True, BLACK)

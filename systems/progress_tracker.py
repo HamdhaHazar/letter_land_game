@@ -16,6 +16,7 @@ class ProgressTracker:
             "mistakes_tracker": {},
             "speed_tracker": {}
         }
+        self.completion_shown = False
         self.load_progress()
         
     def load_progress(self):
