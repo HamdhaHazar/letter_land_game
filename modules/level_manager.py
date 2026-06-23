@@ -49,7 +49,7 @@ class LevelManager:
         self.monkey_evolved = False
         self.congrats_spoken = False
         
-        # Guide Monkey
+        # Guide Bird
         self.monkey = MonkeyGuide(W // 2, H // 2 + 10)
         self.monkey.stage = self.progress.data["monkey_stage"]
         self.monkey.expression = "neutral"
@@ -236,7 +236,7 @@ class LevelManager:
         # Success sound — personalized congratulation!
         nickname = self.progress.get_nickname()
         self.audio.play_sfx("success")
-        self.voice.speak(f"Congratulations {nickname}! You completed the level! Look, Max the Monkey is eating bananas!")
+        self.voice.speak(f"Congratulations {nickname}! You completed the level! Look, Tweety the Bird is dancing with joy!")
 
     def update(self, dt):
         self.particles.update(dt)
@@ -476,12 +476,12 @@ class LevelManager:
             header_font = load_font(18, bold=True)
             draw_sticker_text(surface, f"TUTORIAL: LEVEL {self.level_idx + 1}", header_font, GOLD, (139, 69, 19), (W // 2, 40), border_size=2)
             
-            # 2. Waving Coach Monkey (bottom left)
+            # 2. Waving Guide Bird (bottom left)
             self.monkey.x = 80
             self.monkey.y = H - 150
             self.monkey.draw(surface)
             
-            # 2.5 Coach Monkey Speech Bubble (displays text elegantly, wraps to prevent overlap)
+            # 2.5 Guide Bird Speech Bubble (displays text elegantly, wraps to prevent overlap)
             bubble_rect = pygame.Rect(180, H - 195, W - 260, 100)
             # Soft shadow
             shadow_rect = pygame.Rect(bubble_rect.x + 3, bubble_rect.y + 4, bubble_rect.w, bubble_rect.h)
@@ -589,7 +589,7 @@ class LevelManager:
             draw_gradient_rect(surface, WARM_BG_TOP, WARM_BG_BOT, (0, 0, W, H))
             self.particles.draw(surface)
             
-            # Draw Monkey guide centered
+            # Draw Bird guide centered
             self.monkey.x = W // 2
             self.monkey.y = H // 2 + 60
             self.monkey.draw(surface)
@@ -616,18 +616,18 @@ class LevelManager:
             sub_lbl = sub_rw_font.render(lbl_text, True, BLACK)
             surface.blit(sub_lbl, sub_lbl.get_rect(center=(W // 2, H // 2 - 215)))
             
-            stats_lbl = sub_rw_font.render("Earned:  +15 Stars ⭐    +3 Bananas 🍌", True, BLACK)
+            stats_lbl = sub_rw_font.render("Earned:  +15 Stars ⭐    +3 Seeds 🌾", True, BLACK)
             surface.blit(stats_lbl, stats_lbl.get_rect(center=(W // 2, H // 2 - 185)))
             
             # Evolve Alert
             if self.monkey_evolved and self.cel_time >= 1.8:
                 evolve_rect = pygame.Rect(W // 2 - 200, H // 2 - 130, 400, 42)
                 draw_rounded_rect_with_shadow(surface, WARM_HEADER, evolve_rect, radius=8, shadow_offset=(2, 3), border_width=2, border_color=WHITE)
-                draw_sticker_text(surface, "⭐ MAX THE MONKEY EVOLVED! ⭐", load_font(18, bold=True), CREAM_WHITE, BLACK, evolve_rect.center, border_size=2)
+                draw_sticker_text(surface, "⭐ TWEETY THE BIRD EVOLVED! ⭐", load_font(18, bold=True), CREAM_WHITE, BLACK, evolve_rect.center, border_size=2)
                 
             # Floating Badge reward announcement if unlocked a new badge
             badge_map = {
-                0: "Animal Master 🐵",
+                0: "Animal Master 🐦",
                 1: "Food Expert 🍎",
                 2: "Object Explorer 🚗",
                 3: "Color Genius 🌈",

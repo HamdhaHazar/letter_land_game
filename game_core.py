@@ -1,4 +1,4 @@
-import pygame
+﻿import pygame
 import math
 import random
 import sys
@@ -632,9 +632,50 @@ def draw_vocabulary_picture(surface, word, cx, cy, radius=65):
         for dx in [-30, 0, 30]:
             pygame.draw.circle(surface, SUNNY_YELLOW, (cx + dx, cy + 20), 4)
 
-# --- Guide Monkey Character Model ---
-class MonkeyGuide:
-    """Manages rendering, scaling, expressions, and hopping animations for Max the Monkey."""
+# --- Guide Bird Character Model ---
+# Colors for the Tiny Tunes Blue Bird
+BIRD_BLUE_DARK  = (50,  110, 200)   # Deep blue head/wings
+BIRD_BLUE_MID   = (80,  150, 230)   # Mid-blue body
+BIRD_BLUE_TEAL  = (60,  200, 210)   # Teal wing accent
+BIRD_YELLOW     = (255, 210,  60)   # Warm yellow belly
+BIRD_SHIRT      = (160, 210, 240)   # Light-blue t-shirt
+BIRD_BEAK       = (160,  90,  30)   # Small brown beak
+BIRD_CHEEK      = (255, 160, 160)   # Pink cheek blush
+BIRD_LEG        = (120,  70,  20)   # Brown little legs
+
+# Cached images shared across all instances
+_BIRD_IMAGES = None
+
+def _load_bird_images():
+    """Load and cache all bird expression images from assets."""
+    global _BIRD_IMAGES
+    if _BIRD_IMAGES is not None:
+        return _BIRD_IMAGES
+    import os
+    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+    files = {
+        "happy":    "bird_happy.png",
+        "goodjob":  "bird_goodjob.png",
+        "sad":      "bird_sad.png",
+        "greeting": "bird_greeting.png",
+    }
+    _BIRD_IMAGES = {}
+    for key, fname in files.items():
+        path = os.path.join(assets_dir, fname)
+        try:
+            img = pygame.image.load(path).convert_alpha()
+            _BIRD_IMAGES[key] = img
+        except Exception as e:
+            print(f"BirdGuide: Could not load {path}: {e}")
+            _BIRD_IMAGES[key] = None
+    return _BIRD_IMAGES
+
+class BirdGuide:
+    """Renders the real Tiny Tunes bird image with expressions, scaling, and hop animations."""
+
+    # Base display height in pixels at scale 1.0
+    BASE_H = 180
+
     def __init__(self, x=200, y=500):
         self.x = x
         self.y = y
@@ -642,18 +683,34 @@ class MonkeyGuide:
         self.target_y = y
         self.hop_t = 0.0
         self.is_hopping = False
-        
+
         # Guide evolution mechanics
-        # Stage 0: Small monkey (scale 0.65)
-        # Stage 1: Medium monkey (scale 0.9)
-        # Stage 2: Large monkey (scale 1.15)
+        # Stage 0: Small bird  (scale 0.65)
+        # Stage 1: Medium bird (scale 0.90)
+        # Stage 2: Large bird  (scale 1.15)
         self.stage = 0
-        
+
         # Expression can be: "neutral", "happy", "sad", "waving", "eating", "dancing"
         self.expression = "neutral"
         self.wave_angle = 0
         self.dance_timer = 0
-        
+
+        # Pre-load images on first use
+        _load_bird_images()
+
+    def _get_image_key(self):
+        """Map current expression to which bird image to show."""
+        expr = self.expression
+        if expr in ("happy", "eating"):
+            return "happy"
+        elif expr in ("waving", "neutral"):
+            return "greeting"
+        elif expr in ("dancing",):
+            return "goodjob"
+        elif expr == "sad":
+            return "sad"
+        return "greeting"
+
     def set_target(self, tx, ty):
         self.target_x = tx
         self.target_y = ty
@@ -663,138 +720,66 @@ class MonkeyGuide:
     def update(self, dt):
         # 1. Hopping animation (parabolic path)
         if self.is_hopping:
-            self.hop_t += dt * 1.8  # Speed of movement
+            self.hop_t += dt * 1.8
             if self.hop_t >= 1.0:
                 self.hop_t = 1.0
                 self.x = self.target_x
                 self.y = self.target_y
                 self.is_hopping = False
             else:
-                # Linear interpolation for x
                 self.x = self.x * (1.0 - self.hop_t) + self.target_x * self.hop_t
-                # Parabolic arc for y
-                mid_y = min(self.y, self.target_y) - 120 # Hop height
+                mid_y = min(self.y, self.target_y) - 120
                 t = self.hop_t
                 self.y = (1-t)*(1-t)*self.y + 2*(1-t)*t*mid_y + t*t*self.target_y
-        
+
         # 2. Expression-related timer updates
         self.wave_angle = math.sin(pygame.time.get_ticks() * 0.01) * 30
         self.dance_timer += dt
 
     def draw(self, surface):
-        # Determine scale based on stage
+        imgs = _BIRD_IMAGES or {}
+        key = self._get_image_key()
+        img = imgs.get(key)
+
         base_scales = [0.65, 0.9, 1.15]
-        scale = base_scales[self.stage]
-        
-        # Calculate bobbing effect
+        scale = base_scales[min(self.stage, 2)]
+
+        # Bobbing effect
         bob = math.sin(pygame.time.get_ticks() * 0.005) * 4 if not self.is_hopping else 0
         if self.expression == "dancing":
             bob = abs(math.sin(self.dance_timer * 8) * 15)
-        
-        cx, cy = int(self.x), int(self.y + bob)
-        
-        # Offset details (scaled)
-        def sc(val): return int(val * scale)
-        
-        # --- Draw Monkey Body Elements ---
-        # 1. Shadow below
-        shadow_w = sc(90)
-        shadow_h = sc(16)
-        shadow_rect = pygame.Rect(cx - shadow_w//2, int(self.y + sc(90)), shadow_w, shadow_h)
-        shadow_surf = pygame.Surface((shadow_w, shadow_h), pygame.SRCALPHA)
-        pygame.draw.ellipse(shadow_surf, (0, 0, 0, 70), (0, 0, shadow_w, shadow_h))
-        surface.blit(shadow_surf, shadow_rect.topleft)
 
-        # 2. Tail
-        # Draw tail curve using lines or multiple circles
-        tail_color = PEACH_BROWN
-        tail_points = []
-        for i in range(12):
-            angle = math.radians(-120 - i*20 + (math.sin(pygame.time.get_ticks()*0.005)*10))
-            dist = sc(30 + i*5)
-            tx = cx - sc(20) + int(dist * math.cos(angle))
-            ty = cy + sc(40) + int(dist * math.sin(angle))
-            tail_points.append((tx, ty))
-        if len(tail_points) > 1:
-            pygame.draw.lines(surface, tail_color, False, tail_points, sc(12))
-            # tail tip
-            pygame.draw.circle(surface, tail_color, tail_points[-1], sc(7))
+        # Slight left-right sway when dancing/waving
+        sway = 0
+        if self.expression in ("dancing", "waving"):
+            sway = math.sin(pygame.time.get_ticks() * 0.006) * 6
 
-        # 3. Arms
-        arm_color = PEACH_BROWN
-        if self.expression == "waving" or self.expression == "dancing":
-            # Wave active arm
-            # Left arm (waving)
-            wave_rad = math.radians(-30 + self.wave_angle)
-            lx = cx - sc(25) + int(sc(45) * math.cos(wave_rad + math.pi))
-            ly = cy + sc(20) + int(sc(45) * math.sin(wave_rad + math.pi))
-            pygame.draw.line(surface, arm_color, (cx - sc(25), cy + sc(30)), (lx, ly), sc(14))
-            pygame.draw.circle(surface, PEACH_SKIN, (lx, ly), sc(10))
-            
-            # Right arm (down/dancing)
-            rx_rad = math.radians(30 + (self.wave_angle if self.expression=="dancing" else 0))
-            rx = cx + sc(25) + int(sc(45) * math.cos(rx_rad))
-            ry = cy + sc(20) + int(sc(45) * math.sin(rx_rad))
-            pygame.draw.line(surface, arm_color, (cx + sc(25), cy + sc(30)), (rx, ry), sc(14))
-            pygame.draw.circle(surface, PEACH_SKIN, (rx, ry), sc(10))
+        cx = int(self.x + sway)
+        cy = int(self.y + bob)
+
+        if img is not None:
+            # Scale image to desired display size
+            target_h = int(self.BASE_H * scale)
+            orig_w, orig_h = img.get_size()
+            target_w = int(orig_w * target_h / orig_h)
+            scaled = pygame.transform.smoothscale(img, (target_w, target_h))
+
+            # Draw soft ellipse shadow underneath
+            shadow_w = int(target_w * 0.65)
+            shadow_h = max(8, int(shadow_w * 0.22))
+            shadow_surf = pygame.Surface((shadow_w, shadow_h), pygame.SRCALPHA)
+            pygame.draw.ellipse(shadow_surf, (0, 0, 0, 55), (0, 0, shadow_w, shadow_h))
+            surface.blit(shadow_surf, (cx - shadow_w // 2, int(self.y) + int(self.BASE_H * scale * 0.88)))
+
+            # Blit the bird image centred on (cx, cy)
+            draw_x = cx - target_w // 2
+            draw_y = cy - target_h // 2
+            surface.blit(scaled, (draw_x, draw_y))
         else:
-            # Neutral / resting arms
-            pygame.draw.line(surface, arm_color, (cx - sc(25), cy + sc(35)), (cx - sc(55), cy + sc(60)), sc(12)) # L
-            pygame.draw.circle(surface, PEACH_SKIN, (cx - sc(55), cy + sc(60)), sc(9))
-            
-            pygame.draw.line(surface, arm_color, (cx + sc(25), cy + sc(35)), (cx + sc(55), cy + sc(60)), sc(12)) # R
-            pygame.draw.circle(surface, PEACH_SKIN, (cx + sc(55), cy + sc(60)), sc(9))
+            # Fallback: simple coloured circle if images failed to load
+            r = int(40 * scale)
+            pygame.draw.circle(surface, BIRD_BLUE_DARK, (cx, cy), r)
+            pygame.draw.circle(surface, WHITE, (cx, cy), r, 2)
 
-        # 4. Legs
-        pygame.draw.line(surface, arm_color, (cx - sc(18), cy + sc(65)), (cx - sc(26), cy + sc(95)), sc(15)) # L
-        pygame.draw.ellipse(surface, PEACH_SKIN, (cx - sc(38), cy + sc(90), sc(22), sc(12)))
-        pygame.draw.line(surface, arm_color, (cx + sc(18), cy + sc(65)), (cx + sc(26), cy + sc(95)), sc(15)) # R
-        pygame.draw.ellipse(surface, PEACH_SKIN, (cx + sc(16), cy + sc(90), sc(22), sc(12)))
-
-        # 5. Torso
-        pygame.draw.circle(surface, PEACH_BROWN, (cx, cy + sc(45)), sc(35))
-        # Tummy patch (light skin)
-        pygame.draw.circle(surface, PEACH_SKIN, (cx, cy + sc(48)), sc(22))
-
-        # 6. Ears
-        pygame.draw.circle(surface, PEACH_BROWN, (cx - sc(48), cy), sc(18))
-        pygame.draw.circle(surface, PEACH_SKIN, (cx - sc(48), cy), sc(11))
-        
-        pygame.draw.circle(surface, PEACH_BROWN, (cx + sc(48), cy), sc(18))
-        pygame.draw.circle(surface, PEACH_SKIN, (cx + sc(48), cy), sc(11))
-
-        # 7. Head (Brown circle)
-        pygame.draw.circle(surface, PEACH_BROWN, (cx, cy), sc(45))
-
-        # 8. Face mask (light skin heart/butterfly shape)
-        pygame.draw.circle(surface, PEACH_SKIN, (cx - sc(18), cy - sc(4)), sc(22))
-        pygame.draw.circle(surface, PEACH_SKIN, (cx + sc(18), cy - sc(4)), sc(22))
-        pygame.draw.ellipse(surface, PEACH_SKIN, (cx - sc(26), cy + sc(4), sc(52), sc(30)))
-
-        # 9. Eyes
-        eye_y = cy - sc(6)
-        pygame.draw.circle(surface, BLACK, (cx - sc(14), eye_y), sc(7))
-        pygame.draw.circle(surface, BLACK, (cx + sc(14), eye_y), sc(7))
-        # Glints
-        pygame.draw.circle(surface, WHITE, (cx - sc(16), eye_y - sc(2)), sc(2.5))
-        pygame.draw.circle(surface, WHITE, (cx + sc(12), eye_y - sc(2)), sc(2.5))
-
-        # 10. Nose (small black oval)
-        pygame.draw.ellipse(surface, BLACK, (cx - sc(4), cy + sc(10), sc(8), sc(5)))
-
-        # 11. Mouth / Expressions
-        mouth_y = cy + sc(20)
-        if self.expression in ["happy", "waving", "dancing"]:
-            # Wide open mouth smile
-            pygame.draw.arc(surface, RED, (cx - sc(15), cy + sc(12), sc(30), sc(20)), math.pi, 2*math.pi, sc(10))
-            pygame.draw.arc(surface, BLACK, (cx - sc(15), cy + sc(12), sc(30), sc(20)), math.pi, 2*math.pi, sc(2))
-        elif self.expression == "sad":
-            # Frown
-            pygame.draw.arc(surface, BLACK, (cx - sc(12), mouth_y, sc(24), sc(16)), 0, math.pi, sc(3))
-        elif self.expression == "eating":
-            # Chewing (alternating small mouth line)
-            chew = int(math.sin(pygame.time.get_ticks() * 0.02) * 5)
-            pygame.draw.ellipse(surface, BLACK, (cx - sc(8), mouth_y, sc(16), sc(4) + sc(chew)))
-        else:
-            # Neutral grin
-            pygame.draw.arc(surface, BLACK, (cx - sc(12), cy + sc(10), sc(24), sc(16)), math.pi, 2*math.pi, sc(3))
+# Alias so all existing code referencing MonkeyGuide still works
+MonkeyGuide = BirdGuide

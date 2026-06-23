@@ -1,11 +1,11 @@
 import pygame
 import math
 import random
-from game_core import (W, H, CREAM_WHITE, DEEP_SKY, GOLD, WHITE, BLACK, PURPLE, SUNNY_YELLOW, RED,
+from game_core import (W, H, CREAM_WHITE, DEEP_SKY, GOLD, WHITE, BLACK, PURPLE, SUNNY_YELLOW, RED, ORANGE,
                        LIME_GREEN, WARM_BG_TOP, WARM_BG_BOT, WARM_ACCENT, WARM_HEADER, WARM_CARD,
                        WARM_CORAL, WARM_GREEN, WARM_PEACH,
                        load_font, draw_rounded_rect_with_shadow, draw_gradient_rect,
-                       draw_sticker_text, draw_glow_circle, MonkeyGuide)
+                       draw_sticker_text, draw_glow_circle, MonkeyGuide, BirdGuide)
 from systems.animation_engine import ParticleSystem
 
 # Coordinates for the winding roadmap path
@@ -20,7 +20,7 @@ LEVEL_COORDINATES = [
 ]
 
 LEVEL_INFO = [
-    {"name": "Animal Level", "emoji": "🐵", "theme": "jungle"},
+    {"name": "Animal Level", "emoji": "🐦", "theme": "jungle"},
     {"name": "Food Level", "emoji": "🍎", "theme": "food"},
     {"name": "Object Level", "emoji": "🚗", "theme": "objects"},
     {"name": "Color Level", "emoji": "🌈", "theme": "food"},
@@ -35,8 +35,8 @@ class MapSystem:
         self.audio = audio_manager
         self.progress = progress_tracker
         
-        # Monkey character
-        self.monkey = MonkeyGuide()
+        # Bird character
+        self.monkey = BirdGuide()
         self.monkey.stage = self.progress.data["monkey_stage"]
         
         # Position monkey at player's current level node
@@ -65,7 +65,7 @@ class MapSystem:
         # Level progress detection (for hopping movement)
         curr_lvl = self.progress.data["current_level"]
         if curr_lvl != self.last_known_level:
-            # Let the monkey hop!
+            # Let the bird hop!
             target_coord = LEVEL_COORDINATES[min(curr_lvl, len(LEVEL_COORDINATES) - 1)]
             self.monkey.set_target(target_coord[0], target_coord[1] - 40)
             self.last_known_level = curr_lvl
@@ -218,50 +218,101 @@ class MapSystem:
             tag_font = load_font(15, bold=True)
             draw_sticker_text(surface, info["name"], tag_font, CREAM_WHITE, BLACK, (lx, int(ny) - 52), border_size=2)
 
-        # 5. Draw particles and Max the Monkey hops
+        # 5. Draw particles and Tweety the Bird hops
         self.particles.draw(surface)
         self.monkey.draw(surface)
 
+        # Fetch mouse position to handle hover interactive states
+        mx, my = pygame.mouse.get_pos()
+
         # 6. Top Left: Progress capsule
         bar_rect = pygame.Rect(20, 20, 200, 45)
-        draw_rounded_rect_with_shadow(surface, WHITE, bar_rect, radius=12, shadow_offset=(1, 2), border_width=3, border_color=WARM_ACCENT)
+        bar_hovered = bar_rect.collidepoint(mx, my)
+        
+        if bar_hovered:
+            draw_rect = bar_rect.inflate(6, 6)
+            draw_glow_circle(surface, ORANGE, draw_rect.center, 55, glow_width=25)
+            border_color = WHITE
+            shadow_offset = (2, 4)
+            radius = 15
+        else:
+            draw_rect = bar_rect
+            border_color = WARM_ACCENT
+            shadow_offset = (1, 2)
+            radius = 12
+            
+        draw_rounded_rect_with_shadow(surface, WHITE, draw_rect, radius=radius, shadow_offset=shadow_offset, border_width=3, border_color=border_color)
         
         comp_ratio = len(self.progress.data["completed_levels"]) / float(len(LEVEL_COORDINATES))
-        fill_w = int(180 * comp_ratio)
+        max_fill_w = draw_rect.w - 10
+        fill_w = int(max_fill_w * comp_ratio)
         if fill_w > 0:
-            fill_rect = pygame.Rect(25, 25, fill_w, 35)
-            draw_gradient_rect(surface, (255, 183, 77), (255, 112, 67), fill_rect, radius=8)
+            fill_rect = pygame.Rect(draw_rect.x + 5, draw_rect.y + 5, fill_w, draw_rect.h - 10)
+            draw_gradient_rect(surface, (255, 183, 77), (255, 87, 34), fill_rect, radius=radius - 4)
             
-        pct_font = load_font(14, bold=True)
-        pct_text = pct_font.render(f"PROGRESS: {int(comp_ratio*100)}%", True, BLACK)
-        surface.blit(pct_text, pct_text.get_rect(center=bar_rect.center))
+        pct_font = load_font(13 if bar_hovered else 14, bold=True)
+        pct_text = f"🏆 PROGRESS: {int(comp_ratio*100)}%"
+        draw_sticker_text(surface, pct_text, pct_font, WHITE, BLACK, draw_rect.center, border_size=2)
 
-        # 7. Top Center: 3 Rounded Stats Cards (Stars count, Bananas count, Nickname)
-        start_x = W // 2 - 300
+        # 7. Top Center: 3 Rounded Stats Cards (Stars count, Seeds count, Nickname)
+        start_x = W // 2 - 280
         pills_info = [
-            {"icon": "⭐", "text": f"STARS: {self.progress.data['stars']}", "border": GOLD},
-            {"icon": "🍌", "text": f"BANANAS: {self.progress.data['bananas']}", "border": (255, 152, 0)},
-            {"icon": "❤️", "text": f"NICKNAME: {self.progress.get_nickname()}", "border": (244, 67, 54)}
+            {
+                "icon": "⭐", 
+                "text": f"STARS: {self.progress.data['stars']}", 
+                "glow": SUNNY_YELLOW,
+                "grad_top": (255, 235, 59),
+                "grad_bot": (255, 160, 0)
+            },
+            {
+                "icon": "🌾", 
+                "text": f"SEEDS: {self.progress.data['bananas']}", 
+                "glow": LIME_GREEN,
+                "grad_top": (197, 225, 165),
+                "grad_bot": (104, 159, 56)
+            },
+            {
+                "icon": "👑", 
+                "text": f"{self.progress.get_nickname().upper()}", 
+                "glow": DEEP_SKY,
+                "grad_top": (144, 202, 249),
+                "grad_bot": (21, 101, 192)
+            }
         ]
+        
         for idx, pill in enumerate(pills_info):
             px = start_x + idx * 200
             pill_rect = pygame.Rect(px, 20, 190, 45)
+            hovered = pill_rect.collidepoint(mx, my)
             
-            # White card with vibrant colored borders
-            draw_rounded_rect_with_shadow(surface, WHITE, pill_rect, radius=12, shadow_offset=(1, 2), border_width=3, border_color=pill["border"])
+            if hovered:
+                draw_rect = pill_rect.inflate(6, 6)
+                draw_glow_circle(surface, pill["glow"], draw_rect.center, 50, glow_width=20)
+                border_color = WHITE
+                shadow_offset = (2, 4)
+                radius = 15
+            else:
+                draw_rect = pill_rect
+                border_color = (255, 255, 255)
+                shadow_offset = (1, 2)
+                radius = 12
+                
+            draw_gradient_rect(surface, pill["grad_top"], pill["grad_bot"], draw_rect, radius=radius)
+            pygame.draw.rect(surface, border_color, draw_rect, 3, border_radius=radius)
             
-            icon_font = load_font(20)
+            icon_font = load_font(22 if hovered else 20)
             icon_surf = icon_font.render(pill["icon"], True, BLACK)
-            surface.blit(icon_surf, icon_surf.get_rect(midleft=(px + 10, pill_rect.centery)))
+            icon_y = draw_rect.centery
+            surface.blit(icon_surf, icon_surf.get_rect(midleft=(draw_rect.x + 10, icon_y)))
             
-            # Adjust font size dynamically if the name is too long to prevent overflowing
-            font_size = 13 if len(pill["text"]) > 13 else 14
+            font_size = 12 if len(pill["text"]) > 13 else 14
+            if hovered:
+                font_size += 1
             text_font = load_font(font_size, bold=True)
-            text_surf = text_font.render(pill["text"], True, BLACK)
-            surface.blit(text_surf, text_surf.get_rect(midleft=(px + 38, pill_rect.centery)))
+            
+            draw_sticker_text(surface, pill["text"], text_font, CREAM_WHITE, BLACK, (draw_rect.x + 110, icon_y), border_size=2)
 
         # 8. Top Right: Bold red "X" Quit Button to exit application
-        mx, my = pygame.mouse.get_pos()
         quit_rect = pygame.Rect(W - 65, 20, 45, 45)
         if quit_rect.collidepoint(mx, my):
             quit_rect = quit_rect.inflate(6, 6)
@@ -271,5 +322,6 @@ class MapSystem:
             
         draw_rounded_rect_with_shadow(surface, quit_color, quit_rect, radius=12, shadow_offset=(1, 2), border_width=2, border_color=WHITE)
         draw_sticker_text(surface, "X", load_font(22, bold=True), WHITE, BLACK, quit_rect.center, border_size=1)
+
 
         # (Bottom Navigation Dock drawing removed)

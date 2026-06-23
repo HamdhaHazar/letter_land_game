@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+stderr.txt
+stdout.txt
+.idea/
+.vscode/
