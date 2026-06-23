@@ -236,7 +236,10 @@ class LevelManager:
         # Success sound — personalized congratulation!
         nickname = self.progress.get_nickname()
         self.audio.play_sfx("success")
-        self.voice.speak(f"Congratulations {nickname}! You completed the level! Look, Tweety the Bird is dancing with joy!")
+        if self.level_idx == 6:
+            self.voice.speak(f"Congratulations {nickname}! You have completed the entire game of Words Land! You are now a Grand Champion explorer!")
+        else:
+            self.voice.speak(f"Congratulations {nickname}! You completed the level! Look, Tweety the Bird is dancing with joy!")
 
     def update(self, dt):
         self.particles.update(dt)
@@ -612,7 +615,10 @@ class LevelManager:
             draw_sticker_text(surface, f"GREAT JOB, {nickname.upper()}! 🎉", rw_font, GOLD, (139, 69, 19), (W // 2, H // 2 - 255), border_size=2)
             
             sub_rw_font = load_font(22, bold=True)
-            lbl_text = "Level Completed!"
+            if self.level_idx == 6:
+                lbl_text = "Whole Game Completed!"
+            else:
+                lbl_text = "Level Completed!"
             sub_lbl = sub_rw_font.render(lbl_text, True, BLACK)
             surface.blit(sub_lbl, sub_lbl.get_rect(center=(W // 2, H // 2 - 215)))
             

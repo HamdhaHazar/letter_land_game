@@ -54,7 +54,10 @@ class MapSystem:
         
         # Speak instructions on map start
         nickname = self.progress.get_nickname()
-        self.voice.speak(f"Hey {nickname}! Choose a level to start your adventure!")
+        if len(self.progress.data["completed_levels"]) >= 7:
+            self.voice.speak(f"Welcome back, Grand Champion {nickname}! You have completed the entire game! Feel free to replay any level!")
+        else:
+            self.voice.speak(f"Hey {nickname}! Choose a level to start your adventure!")
 
     def update(self, dt):
         self.bg_time += dt
@@ -325,4 +328,16 @@ class MapSystem:
         draw_sticker_text(surface, "X", load_font(22, bold=True), WHITE, BLACK, quit_rect.center, border_size=1)
 
 
-        # (Bottom Navigation Dock drawing removed)
+        # Draw Game Completion Banner at the bottom if all 7 levels are finished
+        if len(self.progress.data["completed_levels"]) >= 7:
+            banner_rect = pygame.Rect(W // 2 - 280, H - 75, 560, 45)
+            draw_rounded_rect_with_shadow(surface, WARM_GREEN, banner_rect, radius=12, shadow_offset=(1, 2), border_width=2, border_color=WHITE)
+            
+            font = load_font(16, bold=True)
+            msg = "CONGRATULATIONS! YOU COMPLETED THE GAME!"
+            msg_w = font.size(msg)[0]
+            
+            draw_sticker_text(surface, msg, font, CREAM_WHITE, BLACK, banner_rect.center, border_size=2)
+            
+            draw_vector_star(surface, (banner_rect.centerx - msg_w // 2 - 25, banner_rect.centery), size=9, color=GOLD, border_color=WHITE)
+            draw_vector_star(surface, (banner_rect.centerx + msg_w // 2 + 25, banner_rect.centery), size=9, color=GOLD, border_color=WHITE)
